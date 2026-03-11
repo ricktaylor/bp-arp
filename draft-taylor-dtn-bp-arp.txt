@@ -270,8 +270,8 @@ Table of Contents
 
    This means LocalNode (ipn:!.0) cannot be used as the destination for
    BP-ARP probes under current [RFC9758] rules.  This specification
-   updates [RFC9758] to relax this restriction for BP-BP-ARP bundles;
-   see Section 4.4 for the full specification.
+   updates [RFC9758] to relax this restriction for BP-ARP bundles; see
+   Section 4.4 for the full specification.
 
 4.  Normative Specification
 
@@ -281,7 +281,7 @@ Table of Contents
    requests and responses.  The bundle's destination EID distinguishes
    the two:
 
-   *  A bundle destined to ipn:!.0 is an BP-ARP Request.
+   *  A bundle destined to ipn:!.0 is a BP-ARP Request.
 
    *  A bundle destined to a node's own administrative endpoint is a BP-
       ARP Response.
@@ -291,7 +291,7 @@ Table of Contents
 
 4.2.  BP-ARP Request
 
-   An BP-ARP Request is a bundle with the following properties:
+   A BP-ARP Request is a bundle with the following properties:
 
 4.2.1.  Primary Block
 
@@ -333,7 +333,7 @@ Table of Contents
 
 4.3.  BP-ARP Response
 
-   Upon receiving an BP-ARP Request, a BPA MUST respond with an BP-ARP
+   Upon receiving a BP-ARP Request, a BPA MUST respond with a BP-ARP
    Response.
 
 4.3.1.  Primary Block
@@ -582,7 +582,7 @@ Appendix C.  Implementation Notes
 
 C.1.  Integration with BPA
 
-   The BP-BP-ARP subsystem integrates with the BPA as follows:
+   The BP-ARP subsystem integrates with the BPA as follows:
 
    1.  CLA reports a new adjacency, optionally with a Node ID learned
        from the CL layer.
