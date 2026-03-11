@@ -9,19 +9,19 @@ number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+area: "Internet"
+workgroup: "Delay/Disruption Tolerant Networking"
 keyword:
  - next generation
  - unicorn
  - sparkling distributed ledger
 venue:
-  group: WG
-  type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
-  latest: https://example.com/LATEST
+  group: "Delay/Disruption Tolerant Networking"
+  type: "Working Group"
+  mail: "dtn@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/dtn/"
+  github: "ricktaylor/bp-arp"
+  latest: "https://ricktaylor.github.io/bp-arp/draft-taylor-dtn-bp-arp.html"
 
 author:
  -
