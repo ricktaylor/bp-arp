@@ -200,7 +200,7 @@ destination MUST be discarded as invalid."
 
 This means LocalNode (`ipn:!.0`) cannot be used as the destination for
 BP-ARP probes under current {{!RFC9758}} rules. This specification updates
-{{!RFC9758}} to relax this restriction for BP-BP-ARP bundles; see
+{{!RFC9758}} to relax this restriction for BP-ARP bundles; see
 {{localnode-handling}} for the full specification.
 
 # Normative Specification
@@ -211,7 +211,7 @@ BP-ARP uses a single Administrative Record type (TBD1) for both
 requests and responses. The bundle's destination EID distinguishes the
 two:
 
-- A bundle destined to `ipn:!.0` is an BP-ARP Request.
+- A bundle destined to `ipn:!.0` is a BP-ARP Request.
 - A bundle destined to a node's own administrative endpoint is a
   BP-ARP Response.
 
@@ -220,7 +220,7 @@ the bundle was addressed to LocalNode or to its own Node ID.
 
 ## BP-ARP Request
 
-An BP-ARP Request is a bundle with the following properties:
+A BP-ARP Request is a bundle with the following properties:
 
 ### Primary Block
 
@@ -258,7 +258,7 @@ Hop Count limit of 1 provides defence-in-depth against mis-routing.
 
 ## BP-ARP Response
 
-Upon receiving an BP-ARP Request, a BPA MUST respond with an BP-ARP Response.
+Upon receiving a BP-ARP Request, a BPA MUST respond with a BP-ARP Response.
 
 ### Primary Block {#response-primary-block}
 
@@ -452,7 +452,7 @@ multiple Node IDs.
 
 ## Integration with BPA
 
-The BP-BP-ARP subsystem integrates with the BPA as follows:
+The BP-ARP subsystem integrates with the BPA as follows:
 
 1. CLA reports a new adjacency, optionally with a Node ID learned from
    the CL layer.
