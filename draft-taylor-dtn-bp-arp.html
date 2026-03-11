@@ -1484,15 +1484,15 @@ Neighbour's CL address.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
     (knows B's CL address,                      (Node ID: ipn:42.0)
      doesn't know B's Node ID)
          |                                          |
-         |  BP-ARP Request                             |
+         |  BP-ARP Request                          |
          |  src: ipn:17.0                           |
          |  dst: ipn:!.0                            |
          |  [sent to B's CL address]                |
          |-----------------------------------------&gt;|
          |                                          |
-         |                            BP-ARP Response  |
-         |                            src: ipn:42.0 |
-         |                            dst: ipn:17.0 |
+         |                         BP-ARP Response  |
+         |                           src: ipn:42.0  |
+         |                           dst: ipn:17.0  |
          |&lt;-----------------------------------------|
          |                                          |
     Node A learns:                                  |
@@ -1696,7 +1696,7 @@ eid = $eid  ; As defined in RFC 9171 Section 4.2.5.1
 <pre>
 [
   [2, [1, 42, 0]],    / ipn:1.42.0 (3-element encoding) /
-  [1, "//node42/"]    / dtn://node42/                    /
+  [1, "//node42/"]    / dtn://node42/                   /
 ]
 </pre>
 </div>
@@ -2078,7 +2078,7 @@ new Peer.<a href="#appendix-C.1-2.6.1" class="pilcrow">¶</a></p>
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-D-1">TODO acknowledge.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+<p id="appendix-D-1">Thanks are due to Erik Kline and Brian Sipos of early review and discussion.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
