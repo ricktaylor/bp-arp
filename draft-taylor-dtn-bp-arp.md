@@ -158,15 +158,15 @@ Address Resolution:
     (knows B's CL address,                      (Node ID: ipn:42.0)
      doesn't know B's Node ID)
          |                                          |
-         |  BP-ARP Request                             |
+         |  BP-ARP Request                          |
          |  src: ipn:17.0                           |
          |  dst: ipn:!.0                            |
          |  [sent to B's CL address]                |
          |----------------------------------------->|
          |                                          |
-         |                            BP-ARP Response  |
-         |                            src: ipn:42.0 |
-         |                            dst: ipn:17.0 |
+         |                         BP-ARP Response  |
+         |                           src: ipn:42.0  |
+         |                           dst: ipn:17.0  |
          |<-----------------------------------------|
          |                                          |
     Node A learns:                                  |
@@ -298,7 +298,7 @@ An example response payload in CBOR diagnostic notation:
 ~~~ cbor-diag
 [
   [2, [1, 42, 0]],    / ipn:1.42.0 (3-element encoding) /
-  [1, "//node42/"]    / dtn://node42/                    /
+  [1, "//node42/"]    / dtn://node42/                   /
 ]
 ~~~
 {: #arp-example title="Example BP-ARP Response Payload"}
@@ -478,4 +478,4 @@ BP-ARP is implemented generically in the BPA core, not per-CLA:
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+Thanks are due to Erik Kline and Brian Sipos of early review and discussion.
