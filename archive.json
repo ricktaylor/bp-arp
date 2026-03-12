@@ -1,0 +1,103 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-03-12T00:16:57.512282+00:00",
+  "repo": "ricktaylor/bp-arp",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDORkDEtc7yETxg",
+      "title": "consider non-LocalNode alternatives",
+      "url": "https://github.com/ricktaylor/bp-arp/issues/1",
+      "state": "OPEN",
+      "author": "ek345",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "By analogy, letting 127.0.0.0/8 or ::1 src/dst traffic onto the wire seems like not a great idea operationally.\n\nI think it would be worth having the discussion about getting some alternate special-use names, like:\n* `dtn:neighbor`\n* `dtn:peer`\nor something.\n\nIf we want to use DNS-compatible special names we could ask for `dtn:neighbor.dtn.arpa` or similar.  This would be simpler to delegate than the proposed `ipn.arpa` as there are no DNS infrastructure hosting requirements to consider -- it's just a reserved name under `.arpa`.",
+      "createdAt": "2026-03-11T23:22:06Z",
+      "updatedAt": "2026-03-11T23:22:06Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDORkDEtc7yEYW9",
+      "title": "Consider GTSM for BP",
+      "url": "https://github.com/ricktaylor/bp-arp/issues/2",
+      "state": "OPEN",
+      "author": "ek345",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Similar to [RFC 5082](https://datatracker.ietf.org/doc/html/rfc5082) Generalized TTL Security Mechanism (GTSM), it might be a good security practice to require that both TTL fields in these BP-ARP messages are set to `1`, and declare all other values to be a protocol error requiring the Bundle to be discarded (and optionally logged).\n\nIPv6 link-local unicast has a similar mechanism (checking for -1/255), but IPv6 link-local multicast performs this check:\n* [MLDv1](https://datatracker.ietf.org/doc/html/rfc2710#section-3)\n* [MLDv2](https://datatracker.ietf.org/doc/html/rfc3810#section-5)",
+      "createdAt": "2026-03-11T23:28:29Z",
+      "updatedAt": "2026-03-11T23:28:29Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 3,
+      "id": "I_kwDORkDEtc7yEonZ",
+      "title": "received EIDs should be passed to the CLA for additional validation",
+      "url": "https://github.com/ricktaylor/bp-arp/issues/3",
+      "state": "OPEN",
+      "author": "ek345",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "When a BPA receives a BP-ARP reply, it `MUST` validate whether those EIDs are in fact within the scope of the TLS cert that was presented when the CL session was established.  Failure to do would be a pretty obvious attack vector, I would think.",
+      "createdAt": "2026-03-11T23:54:35Z",
+      "updatedAt": "2026-03-11T23:54:35Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": []
+}
