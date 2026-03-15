@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-12T00:16:57.512282+00:00",
+  "timestamp": "2026-03-15T00:22:01.102324+00:00",
   "repo": "ricktaylor/bp-arp",
   "labels": [
     {
@@ -62,9 +62,17 @@
       "labels": [],
       "body": "By analogy, letting 127.0.0.0/8 or ::1 src/dst traffic onto the wire seems like not a great idea operationally.\n\nI think it would be worth having the discussion about getting some alternate special-use names, like:\n* `dtn:neighbor`\n* `dtn:peer`\nor something.\n\nIf we want to use DNS-compatible special names we could ask for `dtn:neighbor.dtn.arpa` or similar.  This would be simpler to delegate than the proposed `ipn.arpa` as there are no DNS infrastructure hosting requirements to consider -- it's just a reserved name under `.arpa`.",
       "createdAt": "2026-03-11T23:22:06Z",
-      "updatedAt": "2026-03-11T23:22:06Z",
+      "updatedAt": "2026-03-13T12:27:28Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ricktaylor",
+          "authorAssociation": "OWNER",
+          "body": "Yeah.. I considered `dtn:local` but then that brings in all of the dtn uri scheme to some extent.\n\nThe only relaxation we're making is on INGRESS.  localnode is still not allowed to leave the BPA...",
+          "createdAt": "2026-03-13T12:27:28Z",
+          "updatedAt": "2026-03-13T12:27:28Z"
+        }
+      ]
     },
     {
       "number": 2,
@@ -78,9 +86,31 @@
       "labels": [],
       "body": "Similar to [RFC 5082](https://datatracker.ietf.org/doc/html/rfc5082) Generalized TTL Security Mechanism (GTSM), it might be a good security practice to require that both TTL fields in these BP-ARP messages are set to `1`, and declare all other values to be a protocol error requiring the Bundle to be discarded (and optionally logged).\n\nIPv6 link-local unicast has a similar mechanism (checking for -1/255), but IPv6 link-local multicast performs this check:\n* [MLDv1](https://datatracker.ietf.org/doc/html/rfc2710#section-3)\n* [MLDv2](https://datatracker.ietf.org/doc/html/rfc3810#section-5)",
       "createdAt": "2026-03-11T23:28:29Z",
-      "updatedAt": "2026-03-11T23:28:29Z",
+      "updatedAt": "2026-03-13T16:26:28Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ricktaylor",
+          "authorAssociation": "OWNER",
+          "body": "I thought I had this in place... let me double check.\n\nBut, YES!",
+          "createdAt": "2026-03-13T12:23:23Z",
+          "updatedAt": "2026-03-13T12:23:23Z"
+        },
+        {
+          "author": "ricktaylor",
+          "authorAssociation": "OWNER",
+          "body": "https://ricktaylor.github.io/bp-arp/draft-taylor-dtn-bp-arp.html#name-hop-count-extension-block \n\nIt's here",
+          "createdAt": "2026-03-13T12:24:01Z",
+          "updatedAt": "2026-03-13T12:24:01Z"
+        },
+        {
+          "author": "ek345",
+          "authorAssociation": "NONE",
+          "body": "Why `SHOULD` and not `MUST`?",
+          "createdAt": "2026-03-13T16:26:27Z",
+          "updatedAt": "2026-03-13T16:26:27Z"
+        }
+      ]
     },
     {
       "number": 3,
@@ -94,9 +124,17 @@
       "labels": [],
       "body": "When a BPA receives a BP-ARP reply, it `MUST` validate whether those EIDs are in fact within the scope of the TLS cert that was presented when the CL session was established.  Failure to do would be a pretty obvious attack vector, I would think.",
       "createdAt": "2026-03-11T23:54:35Z",
-      "updatedAt": "2026-03-11T23:54:35Z",
+      "updatedAt": "2026-03-13T12:28:36Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ricktaylor",
+          "authorAssociation": "OWNER",
+          "body": "Hmm...  is that really needed.  The TLS cert is asserting the security and identity of the peer.  Does it matter if there are aliases published, over the established TLS channel + use BPSec?\n",
+          "createdAt": "2026-03-13T12:28:36Z",
+          "updatedAt": "2026-03-13T12:28:36Z"
+        }
+      ]
     }
   ],
   "pulls": []
