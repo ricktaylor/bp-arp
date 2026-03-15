@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>BP Address Resolution Protocol</title>
+<meta content="Rick Taylor" name="author">
+<meta content="
+       This document specifies the Bundle Protocol Address Resolution Protocol
+(BP-ARP), a mechanism for discovering the Node ID of a Bundle Protocol
+Agent (BPA) that is reachable at a known Convergence Layer (CL) address.
+BP-ARP enables a BPA to resolve CL-layer adjacency into BP-layer peer
+relationships, bootstrapping higher-level protocols such as SAND. This
+document updates RFC 9758 to allow externally received bundles destined
+to the LocalNode administrative endpoint for registered administrative
+record types. 
+    " name="description">
+<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="bundle protocol" name="keyword">
+<meta content="address resolution" name="keyword">
+<meta content="convergence layer" name="keyword">
+<meta content="draft-taylor-dtn-bp-arp-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.31.0
+    Python 3.12.12
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.0.2
+    platformdirs 4.5.1
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.32.5
+    wcwidth 0.3.0
+-->
+<link href="draft-taylor-dtn-bp-arp.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow, a.pilcrow:focus {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">BP-ARP</td>
+<td class="right">March 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Taylor</td>
+<td class="center">Expires 16 September 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Delay/Disruption Tolerant Networking</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-taylor-dtn-bp-arp-latest</dd>
+<dt class="label-updates">Updates:</dt>
+<dd class="updates">
+<a href="https://www.rfc-editor.org/rfc/rfc9758" class="eref">9758</a> (if approved)</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-03-15" class="published">15 March 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-09-16">16 September 2026</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">R. Taylor</div>
+<div class="org">Aalyria Technologies</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">BP Address Resolution Protocol</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document specifies the Bundle Protocol Address Resolution Protocol
+(BP-ARP), a mechanism for discovering the Node ID of a Bundle Protocol
+Agent (BPA) that is reachable at a known Convergence Layer (CL) address.
+BP-ARP enables a BPA to resolve CL-layer adjacency into BP-layer peer
+relationships, bootstrapping higher-level protocols such as SAND. This
+document updates RFC 9758 to allow externally received bundles destined
+to the LocalNode administrative endpoint for registered administrative
+record types.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://ricktaylor.github.io/bp-arp/draft-taylor-dtn-bp-arp.html">https://ricktaylor.github.io/bp-arp/draft-taylor-dtn-bp-arp.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-taylor-dtn-bp-arp/">https://datatracker.ietf.org/doc/draft-taylor-dtn-bp-arp/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Delay/Disruption Tolerant Networking Working Group mailing list (<span><a href="mailto:dtn@ietf.org">mailto:dtn@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/dtn/">https://mailarchive.ietf.org/arch/browse/dtn/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/dtn/">https://www.ietf.org/mailman/listinfo/dtn/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/ricktaylor/bp-arp">https://github.com/ricktaylor/bp-arp</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 16 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-problem-statement" class="internal xref">Problem Statement</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-relationship-to-sand" class="internal xref">Relationship to SAND</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="auto internal xref">1.3</a>.  <a href="#name-design-rationale" class="internal xref">Design Rationale</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-protocol-overview" class="internal xref">Protocol Overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-message-flow" class="internal xref">Message Flow</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-addressing" class="internal xref">Addressing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-rfc-9758-constraint" class="internal xref">RFC 9758 Constraint</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-normative-specification" class="internal xref">Normative Specification</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-administrative-record-type" class="internal xref">Administrative Record Type</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-bp-arp-request" class="internal xref">BP-ARP Request</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
+                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="auto internal xref">4.2.1</a>.  <a href="#name-primary-block" class="internal xref">Primary Block</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.2">
+                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="auto internal xref">4.2.2</a>.  <a href="#name-hop-count-extension-block" class="internal xref">Hop Count Extension Block</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.3">
+                    <p id="section-toc.1-1.4.2.2.2.3.1"><a href="#section-4.2.3" class="auto internal xref">4.2.3</a>.  <a href="#name-payload-block" class="internal xref">Payload Block</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.4">
+                    <p id="section-toc.1-1.4.2.2.2.4.1"><a href="#section-4.2.4" class="auto internal xref">4.2.4</a>.  <a href="#name-transmission" class="internal xref">Transmission</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-bp-arp-response" class="internal xref">BP-ARP Response</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.1">
+                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-primary-block-2" class="internal xref">Primary Block</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.2">
+                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-payload-block-2" class="internal xref">Payload Block</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.3">
+                    <p id="section-toc.1-1.4.2.3.2.3.1"><a href="#section-4.3.3" class="auto internal xref">4.3.3</a>.  <a href="#name-processing" class="internal xref">Processing</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-localnode-address-handling" class="internal xref">LocalNode Address Handling</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-bp-arp-policy" class="internal xref">BP-ARP Policy</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-bpsec-authentication" class="internal xref">BPSec Authentication</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-relaxation-of-localnode-rul" class="internal xref">Relaxation of LocalNode Rule</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-trust-model" class="internal xref">Trust Model</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-administrative-record-type-2" class="internal xref">Administrative Record Type</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-no-service-number-required" class="internal xref">No Service Number Required</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-policy-configuration" class="internal xref">Policy Configuration</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-cla-interface" class="internal xref">CLA Interface</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-implementation-notes" class="internal xref">Implementation Notes</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#appendix-C.1" class="auto internal xref">C.1</a>.  <a href="#name-integration-with-bpa" class="internal xref">Integration with BPA</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#appendix-C.2" class="auto internal xref">C.2</a>.  <a href="#name-generic-implementation" class="internal xref">Generic Implementation</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<div id="problem-statement">
+<section id="section-1.1">
+        <h3 id="name-problem-statement">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-problem-statement" class="section-name selfRef">Problem Statement</a>
+        </h3>
+<p id="section-1.1-1">In Bundle Protocol networks, a Convergence Layer Adapter (CLA) may
+discover link-layer adjacency with another node without learning that
+node's Node ID. For example:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-2.1">
+            <p id="section-1.1-2.1.1">A UDP-based CLA receives packets from a previously unknown IP address.<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">A Bluetooth CLA discovers a nearby device.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.3">
+            <p id="section-1.1-2.3.1">A satellite link becomes available to a ground station.<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-3">In these cases, the CLA knows <em>how</em> to reach the neighbour (CL address)
+but not <em>who</em> they are (Node ID). Without the Node ID, the BPA cannot:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-4.1">
+            <p id="section-1.1-4.1.1">Install routes to the discovered node.<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.2">
+            <p id="section-1.1-4.2.1">Make forwarding decisions for bundles destined to that node.<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.3">
+            <p id="section-1.1-4.3.1">Participate in neighbour discovery protocols like SAND.<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-5">Additionally, some CL protocols convey only a single Node ID during
+session establishment. For example, TCPCLv4 <span>[<a href="#RFC9174" class="cite xref">RFC9174</a>]</span> exchanges one
+Node ID per peer during contact header negotiation. A node that
+supports multiple Node IDs — such as both an <code>ipn</code>-scheme and a
+<code>dtn</code>-scheme Node ID — cannot advertise all of its identities through
+the CL protocol alone. BP-ARP allows discovery of the complete set of
+Node IDs associated with a peer, regardless of CL protocol limitations.<a href="#section-1.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relationship-to-sand">
+<section id="section-1.2">
+        <h3 id="name-relationship-to-sand">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-relationship-to-sand" class="section-name selfRef">Relationship to SAND</a>
+        </h3>
+<p id="section-1.2-1">The IETF SAND protocol <span>[<a href="#I-D.ietf-dtn-bp-sand" class="cite xref">I-D.ietf-dtn-bp-sand</a>]</span> provides secure
+advertisement and neighbourhood discovery at the Bundle Protocol layer.
+However, SAND requires the ability to send bundles to discovered
+neighbours. BP-ARP provides the bootstrap mechanism to resolve CL
+addresses to Node IDs, enabling SAND to operate.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-1.2-2">
+<pre>
+CLA discovers CL adjacency (Neighbour)
+    -&gt; BP-ARP resolves Neighbour -&gt; Peer (learns Node ID)
+        -&gt; SAND can exchange topology information with known Peer
+</pre><a href="#section-1.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="design-rationale">
+<section id="section-1.3">
+        <h3 id="name-design-rationale">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-design-rationale" class="section-name selfRef">Design Rationale</a>
+        </h3>
+<p id="section-1.3-1">BP-ARP is designed as a BPA-level operation, not a service-level one.
+The question "what is your Node ID?" is directed at the BPA itself,
+similar to how ICMP messages in IP are handled by the IP stack rather
+than applications. BP-ARP resolves the singleton identity of a
+specific node; it is analogous to ICMP, not IGMP. Group membership
+discovery for multicast or anycast endpoints is out of scope.<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+<p id="section-1.3-2">For this reason, BP-ARP uses the administrative endpoint rather than a
+dedicated service endpoint.<a href="#section-1.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-2">
+        <dt id="section-2-2.1">Bundle Protocol Agent (BPA):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.2">
+          <p id="section-2-2.2.1">The node-level entity that implements the Bundle Protocol.<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.3">Convergence Layer Adapter (CLA):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.4">
+          <p id="section-2-2.4.1">A component that adapts the Bundle Protocol to a specific underlying
+transport.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.5">Convergence Layer Address (CL Address):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.6">
+          <p id="section-2-2.6.1">A transport-specific address used by a CLA (e.g., IP address + port
+for TCP/UDP).<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.7">Endpoint Identifier (EID):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.8">
+          <p id="section-2-2.8.1">A name for a Bundle Protocol endpoint, using either the <code>ipn</code> or <code>dtn</code>
+URI scheme, as defined in <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span>, Section 4.2.5.1.<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.9">Node ID:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.10">
+          <p id="section-2-2.10.1">The EID that identifies a BPA as a whole, as distinct from any
+application service endpoints. <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span>, Section 3.1 defines the
+Node ID as the endpoint that identifies the BPA itself. Each URI
+scheme defines the Node ID as follows:<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-2.10.2.1">
+              <p id="section-2-2.10.2.1.1"><code>ipn</code> scheme: The Node ID is the administrative endpoint, formed by
+setting the service number to 0. For example, <code>ipn:42.0</code> or
+<code>ipn:1.42.0</code> (with allocator). This is defined in <span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span>,
+Section 3.3.<a href="#section-2-2.10.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2-2.10.2.2">
+              <p id="section-2-2.10.2.2.1"><code>dtn</code> scheme: The Node ID is the node name with no demux part. For
+example, <code>dtn://node42/</code>. This is defined in <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span>,
+Section 4.2.5.1.1.<a href="#section-2-2.10.2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-2-2.10.3">A node <span class="bcp14">MAY</span> have multiple Node IDs across different URI schemes. For
+example, a node might be identified as both <code>ipn:42.0</code> and
+<code>dtn://node42/</code>. Node IDs are by definition singleton endpoints that
+uniquely identify a single BPA; multicast and anycast EIDs are not
+Node IDs.<a href="#section-2-2.10.3" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.11">Peer:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.12">
+          <p id="section-2-2.12.1">A remote BPA with a known Node ID and reachable via a known CL
+address.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.13">Neighbour:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.14">
+          <p id="section-2-2.14.1">A CL adjacency where the CL address is known but the Node ID is
+unknown.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.15">Address Resolution:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.16">
+          <p id="section-2-2.16.1">The process of discovering the Node ID(s) associated with a
+Neighbour's CL address.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="protocol-overview">
+<section id="section-3">
+      <h2 id="name-protocol-overview">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-protocol-overview" class="section-name selfRef">Protocol Overview</a>
+      </h2>
+<div id="message-flow">
+<section id="section-3.1">
+        <h3 id="name-message-flow">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-message-flow" class="section-name selfRef">Message Flow</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-3.1-1">
+<pre>
+    Node A                                      Node B
+    (knows B's CL address,                      (Node ID: ipn:42.0)
+     doesn't know B's Node ID)
+         |                                          |
+         |  BP-ARP Request                          |
+         |  src: ipn:17.0                           |
+         |  dst: ipn:!.0                            |
+         |  [sent to B's CL address]                |
+         |-----------------------------------------&gt;|
+         |                                          |
+         |                         BP-ARP Response  |
+         |                           src: ipn:42.0  |
+         |                           dst: ipn:17.0  |
+         |&lt;-----------------------------------------|
+         |                                          |
+    Node A learns:                                  |
+    B's Node ID is ipn:42.0                         |
+</pre><a href="#section-3.1-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="addressing">
+<section id="section-3.2">
+        <h3 id="name-addressing">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-addressing" class="section-name selfRef">Addressing</a>
+        </h3>
+<p id="section-3.2-1">BP-ARP uses IPN addressing exclusively for the probe mechanism. The ARP
+Request is sent to the LocalNode administrative endpoint <code>ipn:!.0</code>, and
+the BP-ARP Response source is the responding node's <code>ipn</code>-scheme Node ID
+(e.g., <code>ipn:&lt;node&gt;.0</code>). Nodes that do not support IPN addressing cannot
+participate in BP-ARP.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">While the probe mechanism requires IPN addressing, the BP-ARP Response
+payload carries the complete set of Node IDs for the responding node,
+including <code>dtn</code>-scheme Node IDs (e.g., <code>dtn://node42/</code>) alongside
+<code>ipn</code>-scheme Node IDs (e.g., <code>ipn:42.0</code>). This enables discovery of all
+of a node's identities regardless of URI scheme, supporting dual-stack
+deployments.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<div id="rfc9758-constraint">
+<section id="section-3.2.1">
+          <h4 id="name-rfc-9758-constraint">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-rfc-9758-constraint" class="section-name selfRef">RFC 9758 Constraint</a>
+          </h4>
+<p id="section-3.2.1-1"><span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span>, Section 3.4.2 defines LocalNode as Node Number 2^32-1
+(0xFFFFFFFF), represented as <code>ipn:!.&lt;service&gt;</code> or
+<code>ipn:4294967295.&lt;service&gt;</code>.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">However, <span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span>, Section 5.4 states that "all externally received
+bundles featuring LocalNode EIDs as a bundle source or bundle
+destination <span class="bcp14">MUST</span> be discarded as invalid."<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-3">This means LocalNode (<code>ipn:!.0</code>) cannot be used as the destination for
+BP-ARP probes under current <span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span> rules. This specification updates
+<span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span> to relax this restriction for BP-ARP bundles; see
+<a href="#localnode-handling" class="auto internal xref">Section 4.4</a> for the full specification.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="normative-specification">
+<section id="section-4">
+      <h2 id="name-normative-specification">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-normative-specification" class="section-name selfRef">Normative Specification</a>
+      </h2>
+<div id="administrative-record-type">
+<section id="section-4.1">
+        <h3 id="name-administrative-record-type">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-administrative-record-type" class="section-name selfRef">Administrative Record Type</a>
+        </h3>
+<p id="section-4.1-1">BP-ARP uses a single Administrative Record type (TBD1) for both
+requests and responses. The bundle's destination EID distinguishes the
+two:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1">A bundle destined to <code>ipn:!.0</code> is a BP-ARP Request.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1">A bundle destined to a node's own administrative endpoint is a
+BP-ARP Response.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.1-3">This distinction is unambiguous: a receiving BPA always knows whether
+the bundle was addressed to LocalNode or to its own Node ID.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="bp-arp-request">
+<section id="section-4.2">
+        <h3 id="name-bp-arp-request">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-bp-arp-request" class="section-name selfRef">BP-ARP Request</a>
+        </h3>
+<p id="section-4.2-1">A BP-ARP Request is a bundle with the following properties:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<div id="primary-block">
+<section id="section-4.2.1">
+          <h4 id="name-primary-block">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-primary-block" class="section-name selfRef">Primary Block</a>
+          </h4>
+<ul class="normal">
+<li class="normal" id="section-4.2.1-1.1">
+              <p id="section-4.2.1-1.1.1">Source EID: The requesting node's administrative endpoint (e.g.,
+<code>ipn:&lt;node&gt;.0</code>).<a href="#section-4.2.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.2.1-1.2">
+              <p id="section-4.2.1-1.2.1">Destination EID: <code>ipn:!.0</code> (LocalNode administrative endpoint).<a href="#section-4.2.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.2.1-1.3">
+              <p id="section-4.2.1-1.3.1">Bundle Processing Control Flags: Administrative record flag <span class="bcp14">MUST</span> be
+set.<a href="#section-4.2.1-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="hop-count-extension-block">
+<section id="section-4.2.2">
+          <h4 id="name-hop-count-extension-block">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-hop-count-extension-block" class="section-name selfRef">Hop Count Extension Block</a>
+          </h4>
+<p id="section-4.2.2-1">BP-ARP Request bundles <span class="bcp14">SHOULD</span> include a Hop Count extension block (block
+type 10, per <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span>, Section 4.3.3). The hop limit <span class="bcp14">SHOULD</span> be set
+to 1. This prevents the BP-ARP Request from being routed beyond the
+immediate neighbour.<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="request-payload-block">
+<section id="section-4.2.3">
+          <h4 id="name-payload-block">
+<a href="#section-4.2.3" class="section-number selfRef">4.2.3. </a><a href="#name-payload-block" class="section-name selfRef">Payload Block</a>
+          </h4>
+<p id="section-4.2.3-1">The payload block contains an Administrative Record with type TBD1.<a href="#section-4.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.3-2">The payload content is either:<a href="#section-4.2.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.3-3.1">
+              <p id="section-4.2.3-3.1.1">Empty: requesting the complete set of Node IDs from the responding
+node.<a href="#section-4.2.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.2.3-3.2">
+              <p id="section-4.2.3-3.2.1">A CBOR array of already-known Node IDs: requesting only Node IDs not
+included in the list (a delta query).<a href="#section-4.2.3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-4.2.3-4">The payload format is defined in <a href="#arp-payload-cddl" class="auto internal xref">Figure 1</a> using CDDL.<a href="#section-4.2.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="transmission">
+<section id="section-4.2.4">
+          <h4 id="name-transmission">
+<a href="#section-4.2.4" class="section-number selfRef">4.2.4. </a><a href="#name-transmission" class="section-name selfRef">Transmission</a>
+          </h4>
+<p id="section-4.2.4-1">The bundle <span class="bcp14">MUST</span> be sent via the CLA to the specific CL address of the
+Neighbour. The bundle <span class="bcp14">MUST NOT</span> be routed through normal RIB lookup. The
+Hop Count limit of 1 provides defence-in-depth against mis-routing.<a href="#section-4.2.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="bp-arp-response">
+<section id="section-4.3">
+        <h3 id="name-bp-arp-response">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-bp-arp-response" class="section-name selfRef">BP-ARP Response</a>
+        </h3>
+<p id="section-4.3-1">Upon receiving a BP-ARP Request, a BPA <span class="bcp14">MUST</span> respond with a BP-ARP Response.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<div id="response-primary-block">
+<section id="section-4.3.1">
+          <h4 id="name-primary-block-2">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-primary-block-2" class="section-name selfRef">Primary Block</a>
+          </h4>
+<ul class="normal">
+<li class="normal" id="section-4.3.1-1.1">
+              <p id="section-4.3.1-1.1.1">Source EID: The <code>ipn</code>-scheme Node ID of the responding node (e.g.,
+<code>ipn:&lt;node&gt;.0</code>). This <span class="bcp14">MUST NOT</span> be <code>ipn:!.0</code>.<a href="#section-4.3.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-1.2">
+              <p id="section-4.3.1-1.2.1">Destination EID: The source EID from the BP-ARP Request.<a href="#section-4.3.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-1.3">
+              <p id="section-4.3.1-1.3.1">Bundle Processing Control Flags: Administrative record flag <span class="bcp14">MUST</span> be
+set.<a href="#section-4.3.1-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="response-payload-block">
+<section id="section-4.3.2">
+          <h4 id="name-payload-block-2">
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-payload-block-2" class="section-name selfRef">Payload Block</a>
+          </h4>
+<p id="section-4.3.2-1">The payload block contains an Administrative Record with type TBD1
+(the same type as the request).<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-2">If the BP-ARP Request payload was empty, the response payload <span class="bcp14">MUST</span> contain
+a CBOR array of all Node IDs for the responding node, including Node
+IDs of all supported URI schemes (e.g., both <code>ipn</code> and <code>dtn</code>). If the
+BP-ARP Request payload contained a list of known Node IDs, the response
+payload <span class="bcp14">MUST</span> contain only those Node IDs not present in the request
+(the delta). If the requesting node already knows all Node IDs, the
+response payload is an empty CBOR array.<a href="#section-4.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-3">The response <span class="bcp14">MUST</span> contain only singleton Node IDs that uniquely identify
+the responding BPA. Multicast, anycast, or other group EIDs <span class="bcp14">MUST NOT</span>
+be included in the response payload.<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-4">The payload format is defined in <a href="#arp-payload-cddl" class="auto internal xref">Figure 1</a> using CDDL:<a href="#section-4.3.2-4" class="pilcrow">¶</a></p>
+<span id="name-bp-arp-payload-format"></span><div id="arp-payload-cddl">
+<figure id="figure-1">
+            <div class="lang-cddl sourcecode" id="section-4.3.2-5.1">
+<pre>
+arp-payload = [* eid]
+eid = $eid  ; As defined in RFC 9171 Section 4.2.5.1
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-bp-arp-payload-format" class="selfRef">BP-ARP Payload Format</a>
+            </figcaption></figure>
+</div>
+<p id="section-4.3.2-6">An example response payload in CBOR diagnostic notation:<a href="#section-4.3.2-6" class="pilcrow">¶</a></p>
+<span id="name-example-bp-arp-response-pay"></span><div id="arp-example">
+<figure id="figure-2">
+            <div class="lang-cbor-diag sourcecode" id="section-4.3.2-7.1">
+<pre>
+[
+  [2, [1, 42, 0]],    / ipn:1.42.0 (3-element encoding) /
+  [1, "//node42/"]    / dtn://node42/                   /
+]
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-example-bp-arp-response-pay" class="selfRef">Example BP-ARP Response Payload</a>
+            </figcaption></figure>
+</div>
+<p id="section-4.3.2-8">This example shows a node reporting both an <code>ipn</code>-scheme and a
+<code>dtn</code>-scheme Node ID, demonstrating dual-stack identity discovery.<a href="#section-4.3.2-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="processing">
+<section id="section-4.3.3">
+          <h4 id="name-processing">
+<a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-processing" class="section-name selfRef">Processing</a>
+          </h4>
+<p id="section-4.3.3-1">The requesting node associates all Node IDs in the response with the
+Neighbour's CL address. The Neighbour is promoted to Peer with the
+discovered Node IDs. Routes <span class="bcp14">MAY</span> be installed for each discovered Node
+ID.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-2">A response to a delta query is additive: the requesting node combines
+the previously known Node IDs with the newly received Node IDs.<a href="#section-4.3.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="localnode-handling">
+<section id="section-4.4">
+        <h3 id="name-localnode-address-handling">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-localnode-address-handling" class="section-name selfRef">LocalNode Address Handling</a>
+        </h3>
+<p id="section-4.4-1">This section specifies the update to <span>[<a href="#RFC9758" class="cite xref">RFC9758</a>]</span>, Section 5.4.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">A BPA implementing BP-ARP:<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4-3.1">
+            <p id="section-4.4-3.1.1"><span class="bcp14">MUST</span> accept bundles destined to <code>ipn:!.0</code> from external sources if:<a href="#section-4.4-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4-3.1.2.1">
+                <p id="section-4.4-3.1.2.1.1">The bundle is marked as an administrative record, AND<a href="#section-4.4-3.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.4-3.1.2.2">
+                <p id="section-4.4-3.1.2.2.1">The administrative record type is BP-ARP (type TBD1).<a href="#section-4.4-3.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-4.4-3.2">
+            <p id="section-4.4-3.2.1"><span class="bcp14">MUST</span> validate that such bundles are properly formatted.<a href="#section-4.4-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-3.3">
+            <p id="section-4.4-3.3.1"><span class="bcp14">MUST</span> process valid BP-ARP Requests and generate BP-ARP Responses.<a href="#section-4.4-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-3.4">
+            <p id="section-4.4-3.4.1"><span class="bcp14">SHOULD</span> apply rate limiting to prevent denial-of-service attacks.<a href="#section-4.4-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-3.5">
+            <p id="section-4.4-3.5.1"><span class="bcp14">MUST</span> continue to discard other externally received LocalNode
+destination EIDs unless specifically permitted by a registered
+administrative record type.<a href="#section-4.4-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="bp-arp-policy">
+<section id="section-4.5">
+        <h3 id="name-bp-arp-policy">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-bp-arp-policy" class="section-name selfRef">BP-ARP Policy</a>
+        </h3>
+<p id="section-4.5-1">A BPA <span class="bcp14">SHOULD</span> provide a configurable policy that controls whether and
+when BP-ARP resolution is performed. This allows administrators to select
+an appropriate trust model for their deployment (see
+<a href="#policy-configuration" class="auto internal xref">Appendix A</a> for example configurations).<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="bpsec-authentication">
+<section id="section-5.1">
+        <h3 id="name-bpsec-authentication">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-bpsec-authentication" class="section-name selfRef">BPSec Authentication</a>
+        </h3>
+<p id="section-5.1-1">BP-ARP bundles <span class="bcp14">SHOULD</span> be authenticated using BPSec Block Integrity Block
+(BIB) as defined in <span>[<a href="#RFC9172" class="cite xref">RFC9172</a>]</span>.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">BP-ARP Request bundles <span class="bcp14">SHOULD</span> include a BIB targeting the payload block,
+with the requesting node's administrative endpoint as the security
+source. BP-ARP Response bundles <span class="bcp14">SHOULD</span> include a BIB targeting the payload
+block, with the responding node's administrative endpoint as the
+security source.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">BP-ARP assumes that key material is pre-placed and identity is already
+established through out-of-band mechanisms. BP-ARP performs address
+resolution only — mapping a CL address to Node IDs. It does not
+establish trust relationships, exchange credentials, or perform identity
+bootstrapping. Deployments requiring credential exchange or identity
+verification <span class="bcp14">SHOULD</span> use SAND <span>[<a href="#I-D.ietf-dtn-bp-sand" class="cite xref">I-D.ietf-dtn-bp-sand</a>]</span> after BP-ARP
+resolution.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relaxation-of-localnode-rule">
+<section id="section-5.2">
+        <h3 id="name-relaxation-of-localnode-rul">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-relaxation-of-localnode-rul" class="section-name selfRef">Relaxation of LocalNode Rule</a>
+        </h3>
+<p id="section-5.2-1">Accepting external bundles destined to <code>ipn:!.0</code> introduces potential
+security risks:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.2-2">
+          <dt id="section-5.2-2.1">Spoofing:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.2-2.2">
+            <p id="section-5.2-2.2.1">A malicious node could send false BP-ARP Responses.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.2-2.3">Denial of Service:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.2-2.4">
+            <p id="section-5.2-2.4.1">Flooding with BP-ARP Requests could overwhelm a BPA.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.2-2.5">Information Disclosure:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.2-2.6">
+            <p id="section-5.2-2.6.1">BP-ARP Responses reveal a node's Node IDs.<a href="#section-5.2-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.2-3">Mitigations include BPSec BIB authentication (<a href="#bpsec-authentication" class="auto internal xref">Section 5.1</a>),
+rate limiting on BP-ARP Request processing, validation that BP-ARP Requests
+are properly formatted administrative records, and policy configuration
+to disable BP-ARP in sensitive environments.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="trust-model">
+<section id="section-5.3">
+        <h3 id="name-trust-model">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-trust-model" class="section-name selfRef">Trust Model</a>
+        </h3>
+<p id="section-5.3-1">The BP-ARP policy configuration allows administrators to choose appropriate
+trust levels for their deployment. For example, closed networks may
+disable BP-ARP entirely and trust only CLA-provided Node IDs, while open
+networks may use BP-ARP to resolve unknown neighbours. High-security
+deployments may choose to always verify, even when the CLA provides
+Node IDs.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<div id="administrative-record-type-1">
+<section id="section-6.1">
+        <h3 id="name-administrative-record-type-2">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-administrative-record-type-2" class="section-name selfRef">Administrative Record Type</a>
+        </h3>
+<p id="section-6.1-1">This document requests allocation of a new Bundle Protocol
+Administrative Record type from the "Bundle Administrative Record
+Types" registry:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">TBD1</td>
+              <td class="text-left" rowspan="1" colspan="1">BP-ARP</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-6.1-3">A single type is used for both requests and responses. The bundle's
+destination EID distinguishes the two: bundles destined to <code>ipn:!.0</code>
+are requests; bundles destined to a node's own administrative endpoint
+are responses.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="no-service-number-required">
+<section id="section-6.2">
+        <h3 id="name-no-service-number-required">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-no-service-number-required" class="section-name selfRef">No Service Number Required</a>
+        </h3>
+<p id="section-6.2-1">BP-ARP uses the existing administrative endpoint (<code>ipn:X.0</code>) and does
+not require allocation of a new service number.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9171">[RFC9171]</dt>
+        <dd>
+<span class="refAuthor">Burleigh, S.</span>, <span class="refAuthor">Fall, K.</span>, and <span class="refAuthor">E. Birrane, III</span>, <span class="refTitle">"Bundle Protocol Version 7"</span>, <span class="seriesInfo">RFC 9171</span>, <span class="seriesInfo">DOI 10.17487/RFC9171</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9171">https://www.rfc-editor.org/rfc/rfc9171</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9172">[RFC9172]</dt>
+        <dd>
+<span class="refAuthor">Birrane, III, E.</span> and <span class="refAuthor">K. McKeever</span>, <span class="refTitle">"Bundle Protocol Security (BPSec)"</span>, <span class="seriesInfo">RFC 9172</span>, <span class="seriesInfo">DOI 10.17487/RFC9172</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9172">https://www.rfc-editor.org/rfc/rfc9172</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9758">[RFC9758]</dt>
+      <dd>
+<span class="refAuthor">Taylor, R.</span> and <span class="refAuthor">E. Birrane III</span>, <span class="refTitle">"Updates to the 'ipn' URI Scheme"</span>, <span class="seriesInfo">RFC 9758</span>, <span class="seriesInfo">DOI 10.17487/RFC9758</span>, <time datetime="2025-05" class="refDate">May 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9758">https://www.rfc-editor.org/rfc/rfc9758</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ietf-dtn-bp-sand">[I-D.ietf-dtn-bp-sand]</dt>
+        <dd>
+<span class="refAuthor">Sipos, B.</span> and <span class="refAuthor">J. Deaton</span>, <span class="refTitle">"Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-dtn-bp-sand-02</span>, <time datetime="2025-12-18" class="refDate">18 December 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-dtn-bp-sand-02">https://datatracker.ietf.org/doc/html/draft-ietf-dtn-bp-sand-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9174">[RFC9174]</dt>
+      <dd>
+<span class="refAuthor">Sipos, B.</span>, <span class="refAuthor">Demmer, M.</span>, <span class="refAuthor">Ott, J.</span>, and <span class="refAuthor">S. Perreault</span>, <span class="refTitle">"Delay-Tolerant Networking TCP Convergence-Layer Protocol Version 4"</span>, <span class="seriesInfo">RFC 9174</span>, <span class="seriesInfo">DOI 10.17487/RFC9174</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9174">https://www.rfc-editor.org/rfc/rfc9174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="policy-configuration">
+<section id="appendix-A">
+      <h2 id="name-policy-configuration">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-policy-configuration" class="section-name selfRef">Policy Configuration</a>
+      </h2>
+<p id="appendix-A-1">The decision to perform BP-ARP resolution is a BPA configuration option,
+not a CLA implementation choice. The following table illustrates example
+policy settings:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+        <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Policy</th>
+            <th class="text-left" rowspan="1" colspan="1">Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">as-needed</td>
+            <td class="text-left" rowspan="1" colspan="1">Only probe if CLA provides no Node IDs (default)</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">always</td>
+            <td class="text-left" rowspan="1" colspan="1">Always probe, verify/augment CLA-provided Node IDs</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">never</td>
+            <td class="text-left" rowspan="1" colspan="1">Trust CLA, fail if no Node IDs provided</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="appendix-A-3">This separation ensures:<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-4.1">
+          <p id="appendix-A-4.1.1">CLAs report facts (what they learned from the CL layer).<a href="#appendix-A-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-4.2">
+          <p id="appendix-A-4.2.1">Administrators configure policy (trust model for deployment).<a href="#appendix-A-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-4.3">
+          <p id="appendix-A-4.3.1">The BP-ARP subsystem executes the configured policy.<a href="#appendix-A-4.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="cla-interface">
+<section id="appendix-B">
+      <h2 id="name-cla-interface">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-cla-interface" class="section-name selfRef">CLA Interface</a>
+      </h2>
+<p id="appendix-B-1">CLAs report discovered adjacencies to the BPA. A CLA provides:<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-B-2.1">
+          <p id="appendix-B-2.1.1">The CL address of the discovered adjacency.<a href="#appendix-B-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-2.2">
+          <p id="appendix-B-2.2.1">Zero or more Node IDs, if the CLA learned them from the CL layer.<a href="#appendix-B-2.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-B-3">When the Node ID list is empty, the CLA has discovered CL adjacency but
+does not know the Node ID (Neighbour). When the list is non-empty, the
+CLA has learned one or more Node IDs, which may be incomplete due to CL
+protocol limitations. For example, TCPCLv4 <span>[<a href="#RFC9174" class="cite xref">RFC9174</a>]</span> exchanges a
+single Node ID during contact header negotiation; a node with additional
+Node IDs in other URI schemes cannot advertise them through TCPCLv4
+alone.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">Multi-homing is supported: a single CL address may be associated with
+multiple Node IDs.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="implementation-notes">
+<section id="appendix-C">
+      <h2 id="name-implementation-notes">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-implementation-notes" class="section-name selfRef">Implementation Notes</a>
+      </h2>
+<div id="integration-with-bpa">
+<section id="appendix-C.1">
+        <h3 id="name-integration-with-bpa">
+<a href="#appendix-C.1" class="section-number selfRef">C.1. </a><a href="#name-integration-with-bpa" class="section-name selfRef">Integration with BPA</a>
+        </h3>
+<p id="appendix-C.1-1">The BP-ARP subsystem integrates with the BPA as follows:<a href="#appendix-C.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-C.1-2">
+<li id="appendix-C.1-2.1">
+            <p id="appendix-C.1-2.1.1">CLA reports a new adjacency, optionally with a Node ID learned from
+the CL layer.<a href="#appendix-C.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-C.1-2.2">
+            <p id="appendix-C.1-2.2.1">BPA checks BP-ARP policy configuration.<a href="#appendix-C.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-C.1-2.3">
+            <p id="appendix-C.1-2.3.1">If policy requires probing, the BP-ARP subsystem sends a Request to
+<code>ipn:!.0</code> via the CLA. If a Node ID is already known, it may be
+included in the request payload as a delta query.<a href="#appendix-C.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-C.1-2.4">
+            <p id="appendix-C.1-2.4.1">The BP-ARP subsystem receives a Response and extracts the Node ID from
+the source field and any additional Node IDs from the payload.<a href="#appendix-C.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-C.1-2.5">
+            <p id="appendix-C.1-2.5.1">The Neighbour is promoted to Peer with all discovered Node IDs.<a href="#appendix-C.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-C.1-2.6">
+            <p id="appendix-C.1-2.6.1">The Routing Information Base (RIB) is updated with routes to the
+new Peer.<a href="#appendix-C.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="generic-implementation">
+<section id="appendix-C.2">
+        <h3 id="name-generic-implementation">
+<a href="#appendix-C.2" class="section-number selfRef">C.2. </a><a href="#name-generic-implementation" class="section-name selfRef">Generic Implementation</a>
+        </h3>
+<p id="appendix-C.2-1">BP-ARP is implemented generically in the BPA core, not per-CLA:<a href="#appendix-C.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C.2-2.1">
+            <p id="appendix-C.2-2.1.1">The discovery probe is a BP-layer bundle (CL-agnostic).<a href="#appendix-C.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.2">
+            <p id="appendix-C.2-2.2.1">The CLA provides "send to CL address" capability.<a href="#appendix-C.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.3">
+            <p id="appendix-C.2-2.3.1">The BP-ARP subsystem orchestrates the resolution process.<a href="#appendix-C.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.2-2.4">
+            <p id="appendix-C.2-2.4.1">No duplicate resolution logic is needed in each CLA.<a href="#appendix-C.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-D">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-D-1">Thanks are due to Erik Kline and Brian Sipos of early review and discussion.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-E">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Rick Taylor</span></div>
+<div dir="auto" class="left"><span class="org">Aalyria Technologies</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:rtaylor@aalyria.com" class="email">rtaylor@aalyria.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
