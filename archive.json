@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-02T00:21:15.699661+00:00",
+  "timestamp": "2026-04-05T00:23:17.688335+00:00",
   "repo": "ricktaylor/bp-arp",
   "labels": [
     {
@@ -135,6 +135,38 @@
           "updatedAt": "2026-03-13T12:28:36Z"
         }
       ]
+    },
+    {
+      "number": 4,
+      "id": "I_kwDORkDEtc76Y2ZF",
+      "title": "Eid return list integrity check and behaviour",
+      "url": "https://github.com/ricktaylor/bp-arp/issues/4",
+      "state": "OPEN",
+      "author": "duratm",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In a case where what is returned is wrong (either because it is not well formed or incomplete data or other) what should be the behaviour of the bpa receiving this wrong response, should there be a retry, should this node be discarded because it is not responding as we expect it to ? Or this is not a specification that is needed and will be decided at the implementation level.",
+      "createdAt": "2026-04-03T14:33:33Z",
+      "updatedAt": "2026-04-03T14:33:33Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDORkDEtc76Z1xr",
+      "title": "Received Eid list in a Request check and behaviour",
+      "url": "https://github.com/ricktaylor/bp-arp/issues/5",
+      "state": "OPEN",
+      "author": "duratm",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In the case where the sender of the Arp Request added an Eid list (to get an updated list of eid from the node). What the receiver should do if the list  is not right, for example if there are eids in this list that does not belong to this node, what should be the behavior of the receiving node (Given that only the delta is sent in the response to the requesting node).",
+      "createdAt": "2026-04-03T15:34:40Z",
+      "updatedAt": "2026-04-03T15:34:40Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": []
